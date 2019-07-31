@@ -1,0 +1,30 @@
+<h1 class="title">Search Products</h1>
+
+<form [formGroup]="searchForm" class="form" (ngSubmit)="onSearch()">
+
+  <mat-form-field class="form__field">
+    <input type="text" placeholder="Title" matInput formControlName="title">
+    <mat-error>Title is too short</mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form__field">
+    <input type="number" placeholder="Min Price" matInput formControlName="minPrice">
+    <mat-error>Cannot be less than 0</mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="form__field">
+    <input type="number" placeholder="Max Price" matInput formControlName="maxPrice"
+           [errorStateMatcher]="matcher">
+    <mat-error *ngIf="searchForm.controls['maxPrice'].hasError('min')">
+      Cannot be less than 0
+    </mat-error>
+    <mat-error *ngIf="searchForm.controls['maxPrice'].hasError('max')">
+      Cannot be more than 10000
+    </mat-error>
+    <mat-error *ngIf="searchForm.hasError('minLessThanMax')">
+      Should be larger than min price
+    </mat-error>
+  </mat-form-field>
+
+  <button mat-raised-button class="form__submit" color="primary">SEARCH</button>
+</form>

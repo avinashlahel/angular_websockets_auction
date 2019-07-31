@@ -1,0 +1,18 @@
+@import '../../../styles/theme';
+
+:host {
+  display: block;
+}
+
+.tabs {
+  background-color: mat-color($nga-background, card);
+  //background-color: mat-color($nga-primary);
+}
+
+.mat-tab-label-active{
+  background-color: mat-color($nga-accent);
+}
+
+.grid-list-container {
+  margin: 16px;
+}

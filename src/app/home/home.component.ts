@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ObservableMedia} from '@angular/flex-layout';
 import {Product, ProductService} from '../shared/services';
 import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, startWith} from 'rxjs/operators';
 
 @Component({
   selector: 'nga-home',
@@ -27,7 +27,11 @@ export class HomeComponent implements OnInit {
               private productService: ProductService) {
     this.products$ = productService.getAll();
     this.columns$ = media.asObservable()
-      .pipe(map(mc => <number>this.breakpointsToColumnsNumber.get(mc.mqAlias)));
+      .pipe(
+        map(mc => <number>this.breakpointsToColumnsNumber.get(mc.mqAlias)),
+        startWith(3)
+      )
+
   }
 
   ngOnInit() {
