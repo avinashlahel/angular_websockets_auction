@@ -24,12 +24,7 @@ export class ProductComponent implements OnInit {
         switchMap(productId => this.productService.getById(productId))
       );
 
-    this.suggestedProduct$ = this.route.paramMap
-      .pipe(
-        map(param => parseInt(param.get('productId') || '', 10)),
-        filter(productId => !!productId),
-        switchMap(productId => this.productService.getAllExcluding(productId))
-      );
+    this.suggestedProduct$ = this.productService.getAll();
   }
 
   ngOnInit() {

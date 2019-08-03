@@ -1,11 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {map, tap} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { API_BASE_URL } from '../../app.tokens';
 
-/**
- * @author Avinash
- */
 export interface Product {
   id: number;
   title: string;
@@ -16,78 +14,45 @@ export interface Product {
 }
 
 export interface ProductSearchParams {
+  [key: string]: any; // To make compatible with HttpParams type.
   title?: string;
   minPrice?: number;
   maxPrice?: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ProductService {
+export abstract class ProductService {
+  abstract getAll(): Observable<Product[]>;
+  abstract getById(productId: number): Observable<Product>;
+  abstract getByCategory(category: string): Observable<Product[]>;
+  abstract getAllCategories(): Observable<string[]>;
+  abstract search(params: ProductSearchParams): Observable<Product[]>;
+}
 
-  constructor(private http: HttpClient) {}
-
-  /**
-   * Mainly used in suggestions; Filter out the product
-   * already selected by the user
-   * @param productId
-   */
-  getAllExcluding(productId: number): Observable<Product[]>{
-    return this.http.get<Product[]>('/data/products.json')
-      .pipe(
-        map(products => products.filter(product => product.id !== productId))
-      );
-  }
-
-  getByCategory(category: string): Observable<Product[]> {
-    return this.http.get<Product[]>('/data/products.json').pipe(
-      map(products => products.filter(p => p.categories.includes(category)))
-    );
-  }
-
-  /**
-   * To get the distinct categories available in the app to show
-   * in @CategoriesComponent
-   */
-  getDistinctCategories(): Observable<string[]>{
-
-    return this.http.get<Product[]>('/data/products.json')
-      .pipe(
-        map(this.reduceCategories),
-        map(categories => Array.from(new Set(categories))),
-        // tap(value => console.log(`After creating categories array ${value}`))
-      );
-
-  }
-
-  private reduceCategories(product: Product[]) : string[]{
-    return product.reduce((newArr , prod) => newArr.concat(prod.categories),new Array());
-  }
+@Injectable()
+export class HttpProductService implements ProductService {
+  constructor(
+    @Inject(API_BASE_URL) private baseUrl: string,
+    private http: HttpClient
+  ) {}
 
   getAll(): Observable<Product[]> {
-    return this.http.get<Product[]>('/data/products.json');
+    return this.http.get<Product[]>(`${this.baseUrl}/api/products`);
   }
 
   getById(productId: number): Observable<Product> {
-    return this.http.get<Product[]>('/data/products.json')
-      .pipe(
-        map(products => <Product>products.find(p => p.id === productId))
-      );
+    return this.http.get<Product>(`${this.baseUrl}/api/products/${productId}`);
   }
 
-  search(params): Observable<Product[]> {
-    return this.http.get<Product[]>('/data/products.json').pipe(
-      map(products => this.filterProducts(products, params.params)),
-      tap(p => console.log(`filtered products ${p}`))
-    );
+  getByCategory(category: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.baseUrl}/api/categories/${category}`);
   }
 
-  // Keep only those product that meet the criteria from search params
-  private filterProducts(products: Product[], params: ProductSearchParams): Product[] {
-    return products
-      .filter(p => params.title ? p.title.toLowerCase().includes((<string>params.title).toLowerCase()) : products)
-      .filter(p => params.minPrice ? p.price >= params.minPrice : products)
-      .filter(p => params.maxPrice ? p.price <= params.maxPrice : products);
+  getAllCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/api/categories`);
+  }
+
+  search(params: ProductSearchParams): Observable<Product[]> {
+    const query = params.params;
+    return this.http.get<Product[]>(`${this.baseUrl}/api/products`, { params: query });
   }
 }
