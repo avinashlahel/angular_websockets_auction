@@ -1,4 +1,4 @@
-#ngAuction Sample application
+# ngAuction Sample application
 
 The code consists of two applications; The angular application is in the client folder
 and the Node application is in the server folder.

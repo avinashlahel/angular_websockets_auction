@@ -24,7 +24,6 @@ const db$ = readFile('./data/products.json','UTF-8')
     .then(JSON.parse,console.error);
 
 export async function getAllCategories(): Promise<string[]> {
-    console.log(`Test for whats db$ ${db$}`);
     const allCategories: string[] =  (await db$)
         .map(p => p.categories)
         .reduce((combined,val) => combined.concat(val),[]);
